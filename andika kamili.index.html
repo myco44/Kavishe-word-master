@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="sw">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kavishe Word Master - Icons Edition</title>
+<style>
+body{margin:0;font-family:sans-serif;background:#f3e5f5;color:#111;}
+.container{display:flex;flex-direction:column;gap:12px;padding:12px;}
+.panel{background:#ffffff;border-radius:12px;padding:14px;box-shadow:0 6px 20px rgba(0,0,0,0.15);}
+h3{margin-top:0;color:#6a1b9a;text-align:center;font-family:'Verdana',sans-serif;}
+.controls{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px;align-items:center;justify-content:center;}
+.controls select,input[type="number"],input[type="color"]{padding:4px;border-radius:6px;border:1px solid #ccc;}
+.controls button{padding:6px 10px;border:none;border-radius:6px;background:#8e24aa;color:#fff;cursor:pointer;display:flex;align-items:center;gap:4px;transition:0.2s;}
+.controls button:hover{background:#6a1b9a;}
+.controls button.ghost{background:transparent;color:#8e24aa;border:1px solid #8e24aa;}
+.controls button.ghost:hover{background:#8e24aa;color:#fff;}
+#editor{width:100%;min-height:500px;border:2px solid #ce93d8;border-radius:10px;padding:14px;overflow:auto;outline:none;background:#f3e5f5;white-space:pre-wrap;font-size:16px;color:#000;}
+.icon{font-weight:bold;font-size:14px;}
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="panel">
+    <h3>Kavishe Word Master - Icons Edition</h3>
+    <div class="controls">
+      <select id="fontFamily">
+        <option value="Arial">Arial</option>
+        <option value="Verdana">Verdana</option>
+        <option value="Tahoma">Tahoma</option>
+        <option value="Times New Roman">Times New Roman</option>
+        <option value="Georgia">Georgia</option>
+        <option value="Courier New">Courier New</option>
+        <option value="Comic Sans MS">Comic Sans MS</option>
+        <option value="Impact">Impact</option>
+        <option value="Lucida Console">Lucida Console</option>
+        <option value="Brush Script MT">Brush Script MT</option>
+        <option value="Monospace">Monospace</option>
+        <option value="Cursive">Cursive</option>
+        <option value="Fantasy">Fantasy</option>
+        <option value="Serif">Serif</option>
+        <option value="Sans-Serif">Sans-Serif</option>
+      </select>
+      <input type="number" id="fontSize" value="16" min="8" max="100"/> px
+      <input type="color" id="fontColor" value="#000000"/>
+      <input type="color" id="bgColor" value="#ffffff"/>
+      <button id="boldBtn"><span class="icon">B</span></button>
+      <button id="italicBtn"><span class="icon">I</span></button>
+      <button id="underlineBtn"><span class="icon">U</span></button>
+      <button id="strikeBtn"><span class="icon">S</span></button>
+      <button id="supBtn"><span class="icon">X²</span></button>
+      <button id="subBtn"><span class="icon">X₂</span></button>
+      <button id="bulletBtn"><span class="icon">&#8226;</span></button>
+      <button id="numberBtn"><span class="icon">1.</span></button>
+      <button id="indentIn"><span class="icon">&#8594;</span></button>
+      <button id="indentOut"><span class="icon">&#8592;</span></button>
+      <select id="alignSelect">
+        <option value="left">&#8676; Left</option>
+        <option value="center">&#8596; Center</option>
+        <option value="right">&#8677; Right</option>
+        <option value="justify">&#8644; Justify</option>
+      </select>
+      <button id="undoBtn" class="ghost">&#8630;</button>
+      <button id="redoBtn" class="ghost">&#8631;</button>
+      <button id="exportPNG">&#128247; PNG</button>
+      <button id="exportPDF">&#128196; PDF</button>
+      <button id="clearBtn" class="ghost">&#128465;</button>
+    </div>
+    <div id="editor" contenteditable="true" spellcheck="true" style="font-family:Arial;font-size:16px;color:#000;background-color:#f3e5f5;">Andika hapa maneno yako...</div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script>
+const editor=document.getElementById('editor');
+const fontFamilySelect=document.getElementById('fontFamily');
+const fontSizeInput=document.getElementById('fontSize');
+const fontColorInput=document.getElementById('fontColor');
+const bgColorInput=document.getElementById('bgColor');
+const alignSelect=document.getElementById('alignSelect');
+
+let isBold=false, isItalic=false, isUnderline=false, isStrike=false, isSup=false, isSub=false;
+let history=[], future=[];
+
+function saveHistory(){ history.push(editor.innerHTML); if(history.length>50) history.shift(); future=[]; }
+editor.addEventListener('input',()=>saveHistory());
+
+function updateStyle(){
+  editor.style.fontFamily=fontFamilySelect.value;
+  editor.style.fontSize=fontSizeInput.value+'px';
+  editor.style.color=fontColorInput.value;
+  editor.style.backgroundColor=bgColorInput.value;
+  editor.style.fontWeight=isBold?'bold':'normal';
+  editor.style.fontStyle=isItalic?'italic':'normal';
+  editor.style.textDecoration=(isUnderline?'underline ':'')+(isStrike?'line-through':'');
+  editor.style.verticalAlign=isSup?'super':(isSub?'sub':'baseline');
+  editor.style.textAlign=alignSelect.value;
+}
+
+document.getElementById('boldBtn').onclick=()=>{ isBold=!isBold; updateStyle(); };
+document.getElementById('italicBtn').onclick=()=>{ isItalic=!isItalic; updateStyle(); };
+document.getElementById('underlineBtn').onclick=()=>{ isUnderline=!isUnderline; updateStyle(); };
+document.getElementById('strikeBtn').onclick=()=>{ isStrike=!isStrike; updateStyle(); };
+document.getElementById('supBtn').onclick=()=>{ isSup=!isSup; if(isSup) isSub=false; updateStyle(); };
+document.getElementById('subBtn').onclick=()=>{ isSub=!isSub; if(isSub) isSup=false; updateStyle(); };
+document.getElementById('bulletBtn').onclick=()=>document.execCommand('insertUnorderedList');
+document.getElementById('numberBtn').onclick=()=>document.execCommand('insertOrderedList');
+document.getElementById('indentIn').onclick=()=>document.execCommand('indent');
+document.getElementById('indentOut').onclick=()=>document.execCommand('outdent');
+alignSelect.onchange=()=>editor.style.textAlign=alignSelect.value;
+
+function wrapSelection(styleObj){
+  const sel=window.getSelection();
+  if(!sel.rangeCount) return;
+  const range=sel.getRangeAt(0);
+  if(range.collapsed) return;
+  const span=document.createElement('span');
+  for(const k in styleObj) span.style[k]=styleObj[k];
+  span.appendChild(range.extractContents());
+  range.insertNode(span);
+  sel.removeAllRanges();
+  const newRange=document.createRange();
+  newRange.selectNodeContents(span);
+  sel.addRange(newRange);
+  saveHistory();
+}
+
+fontSizeInput.onchange=()=>wrapSelection({fontSize:fontSizeInput.value+'px'});
+fontColorInput.onchange=()=>wrapSelection({color:fontColorInput.value});
+bgColorInput.onchange=()=>wrapSelection({backgroundColor:bgColorInput.value});
+fontFamilySelect.onchange=()=>wrapSelection({fontFamily:fontFamilySelect.value});
+
+document.getElementById('undoBtn').onclick=()=>{
+  if(history.length>0){ future.push(editor.innerHTML); editor.innerHTML=history.pop(); }
+}
+document.getElementById('redoBtn').onclick=()=>{
+  if(future.length>0){ history.push(editor.innerHTML); editor.innerHTML=future.pop(); }
+}
+document.getElementById('clearBtn').onclick=()=>{ if(confirm('Futa yote?')){ saveHistory(); editor.innerHTML=''; } }
+document.getElementById('exportPNG').onclick=()=>{
+  html2canvas(editor,{scale:2}).then(canvas=>{
+    const a=document.createElement('a');
+    a.href=canvas.toDataURL('image/png');
+    a.download='kavishe-word-master-icons.png';
+    a.click();
+  });
+}
+document.getElementById('exportPDF').onclick=()=>{
+  html2canvas(editor,{scale:2}).then(canvas=>{
+    const imgData=canvas.toDataURL('image/png');
+    const { jsPDF } = window.jspdf;
+    const pdf=new jsPDF('p','pt',[canvas.width,canvas.height]);
+    pdf.addImage(imgData,'PNG',0,0,canvas.width,canvas.height);
+    pdf.save('kavishe-word-master-icons.pdf');
+  });
+}
+updateStyle();
+saveHistory();
+</script>
+</body>
+</html>
